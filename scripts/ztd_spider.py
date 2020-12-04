@@ -39,7 +39,9 @@ async def get_ztd_list(url,site):
 async def download_file(url):
     print("start download ", url)
     file = url.split("/")[-1]
-    file = "./data/" + file
+    site = url.split("/")[-2]
+    year = url.split(".")[-3]
+    file = f"./data/{site}/{year}/{file}"
     if os.path.exists(file):
         print("end download file exist", url)
         return 
