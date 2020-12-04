@@ -41,7 +41,10 @@ async def download_file(url):
     file = url.split("/")[-1]
     site = url.split("/")[-2]
     year = url.split(".")[-3]
+    path = f"./data/{site}/{year}"
     file = f"./data/{site}/{year}/{file}"
+    if not os.path.exists(path):
+        os.makedirs(path)
     if os.path.exists(file):
         print("end download file exist", url)
         return 

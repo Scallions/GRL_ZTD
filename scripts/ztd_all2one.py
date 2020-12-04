@@ -7,7 +7,7 @@ import asyncio
 
 
 def find_years(site):
-    for name in glob.iglob('data/'+site+'*'):
+    for name in glob.iglob('data/'+site+'/*'):
         print(name)
 
 def find_days(site, year):
