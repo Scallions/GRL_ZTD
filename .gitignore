@@ -3,3 +3,4 @@ data
 !/data/sites.csv
 temp/*
 temp
+.vscode/

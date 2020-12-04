@@ -12,8 +12,11 @@ async def get_ztd_list(url,site):
     print("start get ", url)
     i = 0
     while True:
+        i+=1
+        if i > 10 :
+            print("url maybe not correct:",url)
+            break
         try:
-            i+=1
             rep = await requests.get(url)
             if rep.status_code == 200:
                 break 
@@ -22,9 +25,6 @@ async def get_ztd_list(url,site):
                 break
             else:
                 await asyncio.sleep(1)
-            if i > 10 :
-                print("url maybe not correct:",url)
-                break
         except:
             await asyncio.sleep(1)
             continue
@@ -45,8 +45,11 @@ async def download_file(url):
         return 
     i = 0
     while True:
+        i+=1
+        if i > 10 :
+            print("url maybe not correct:",url)
+            break
         try:
-            i+=1
             rep = await requests.get(url)
             if rep.status_code == 200:
                 break 
