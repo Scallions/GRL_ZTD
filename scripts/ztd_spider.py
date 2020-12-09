@@ -76,7 +76,7 @@ async def download_file(url):
 
 async def crawl_page(site):
     base_url = "http://geodesy.unr.edu/gps_timeseries/trop/"
-    url = base_url + site.strip()
+    url = base_url + site
     print("start crawl ", url)
     urls = await asyncio.create_task(get_ztd_list(url,site))
     tasks = []
@@ -91,7 +91,7 @@ async def main():
     # print(sites.head())
     tasks = []
     for site in sites.readlines():
-        tasks.append(asyncio.create_task(crawl_page(site)))
+        tasks.append(asyncio.create_task(crawl_page(site.strip())))
         # break
     await asyncio.gather(*tasks)
 
