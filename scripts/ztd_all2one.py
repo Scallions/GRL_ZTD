@@ -25,7 +25,7 @@ def find_years(site):
     
     # file name AASI.2005.trop.zip
     years = []
-    for name in glob.iglob('data/'+site+'/[0-9][0-9][0-9][0-9]'):
+    for name in glob.iglob('data/ztd/'+site+'/[0-9][0-9][0-9][0-9]'):
         # print(name)
         years.append(name.split('/')[-1])
         # 判断并解压文件
@@ -39,7 +39,7 @@ def find_years(site):
 
 def find_days(site, year):
     days = []
-    for name in glob.iglob('data/'+site+'/' + year+'/*'):
+    for name in glob.iglob('data/ztd/'+site+'/' + year+'/*'):
         # print(name)
         if not name.endswith('.gz'):
             continue
@@ -48,7 +48,7 @@ def find_days(site, year):
     return days
 
 def write_data(site, years_data):
-    outfile = f"data/{site}/all.txt"
+    outfile = f"data/ztd/{site}/all.txt"
     print(f"write {site} data to {outfile}")
     with open(outfile,"w") as f:
         f.write("".join(years_data))
@@ -75,7 +75,7 @@ def read_gzfile(file_path):
 
 
 async def get_day_data(site, year, day):
-    file = f"data/{site}/{year}/{site}.{year}.{day}.trop.gz"
+    file = f"data/ztd/{site}/{year}/{site}.{year}.{day}.trop.gz"
     # cmd = f"zgrep -A1000 -m1 '^[+-]TROP/SOLUTION' {file}"
     # cmd1 = shlex.split(cmd)
     # cmd2 = shlex.split("tail -n+3")
@@ -112,7 +112,7 @@ async def get_year_data(site, year):
         days_data.append(await task)
     print(f"end {site} {year}")
     years_data = "".join(days_data)  
-    filename = f"data/{site}/{year}/all.txt"
+    filename = f"data/ztd/{site}/{year}/all.txt"
     with open(filename, "w") as f:
         f.write(years_data)
         print(f"wirte {site} {year} to {filename}")
@@ -136,7 +136,7 @@ async def all2one(site):
 
 async def main():
     # sites = pd.read_csv("./data/sites.csv")
-    sites = open("./data/sites.csv")
+    sites = open("./data/ztd/sites.csv")
     # print(sites.head())
     tasks = []
     for site in sites.readlines():

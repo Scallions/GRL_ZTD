@@ -1,6 +1,14 @@
+# datas
+!/data/ztd/sites.csv
 data/*
 data
-!/data/sites.csv
+radio/*
+radio
+
 temp/*
 temp
 .vscode/*
+
+# figures
+figs/*
+figs
