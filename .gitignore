@@ -12,3 +12,5 @@ temp
 # figures
 figs/*
 figs
+result_images/*
+result_images
