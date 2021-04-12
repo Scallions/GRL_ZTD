@@ -1,4 +1,6 @@
 import asyncio
+import requests_async as requests
+import os
 
 """
 需要提取信息
@@ -6,8 +8,6 @@ import asyncio
 - pw 
 """
 
-async def get_data_in(site,year,month,day):
-    base_url = f'http://weather.uwyo.edu/cgi-bin/sounding?region=ant&TYPE=TEXT%3ALIST&YEAR={year}&MONTH={month:2d}&FROM={day:2d}00&TO={day:2d}12&STNM={site}'
 
 def load_grl_sites():
     """Find sites in Greenland
@@ -16,22 +16,105 @@ def load_grl_sites():
         [site_info]: list of sites info
     """
     sites_file = "radio/wyoming/radiosonde-station-list.txt"
+    # 后5个数字是测站代码
     sites_list = []
     with open(sites_file,'r') as f:
         for line in f.readlines():
-            data = line.split()
-            lat, lon = float(data[1]), float(data[2])
+            site_num = line[6:11]
+            lon = float(line[22:30])
+            lat = float(line[12:20])
+            start = line[72:76]
+            end = line[77:81]
             if 55 < lat < 85 and -75 < lon < -10:
-                print(f"{data[0]}: {lat:.2f}, {lon:.2f}")
-                sites_list.append(" ".join(data[:3]))
-    return sites_list
+                print(f"{site_num}: {lat:.2f}, {lon:.2f}")
+                sites_list.append(f"{site_num} {lat} {lon} {start} {end}")
+    print(len(sites_list))
+    with open("temp/wyoming_sites.csv","w") as f:
+        for site in sites_list:
+            f.write(site+"\n")
+
+def read_sites():
+    """read site meta data from csv file
+
+    Returns:
+        [site_metadata]: metadata of radio sites
+    """
+    sites = []
+    with open("temp/wyoming_sites.csv", "r") as f:
+        for line in f.readlines():
+            data = line.split()
+            sites.append([data[0],data[-2], data[-1]])
+    return sites 
+
+async def download_file(url, site, year, month, day):
+    print("start download ", url)
+    path = f"./radio/wyoming/{site}/{year}"
+    file = f"./radio/wyoming/{site}/{year}/{month}-day.txt"
+    if not os.path.exists(path):
+        os.makedirs(path)
+    if os.path.exists(file):
+        print("end download file exist", url)
+        return 
+    i = 0
+    while True:
+        i+=1
+        if i > 10 :
+            print("url maybe not correct:",url)
+            break
+        try:
+            rep = await requests.get(url)
+            if rep.status_code == 200:
+                break 
+            elif rep.status_code == 400:
+                print("url not found ", url)
+                break 
+            else:
+                await asyncio.sleep(1)
+            if i > 10 :
+                print("url maybe not correct:",url)
+                break
+        except:
+            await asyncio.sleep(1)
+            continue
+    with open(file, "wb") as code:
+        code.write(rep.content)
+    print("end download ", url)
+
+async def get_data_in(site,year,month,day):
+    base_url = f'http://weather.uwyo.edu/cgi-bin/sounding?region=np&TYPE=TEXT%3ALIST&YEAR={year}&MONTH={month:02d}&FROM={day:02d}00&TO={day:02d}12&STNM={site}'
+    await download_file(base_url, site, year, month, day)
+
+async def get_year_data(site, year):
+    for mon in range(1,13):
+        tasks = []
+        s1 = asyncio.Semaphore(5)
+        async with s1:
+            for day in range(1,32):
+                tasks.append(asyncio.create_task(get_data_in(site,year, mon, day)))
+            await asyncio.gather(*tasks)
+
+async def get_site_data(site):
+    start = int(site[-2])
+    end = int(site[-1])
+    tasks = []
+    s1 = asyncio.Semaphore(5)
+    async with s1:
+        for year in range(start,end+1):
+            tasks.append(asyncio.create_task(get_year_data(site[0],year)))
+        await asyncio.gather(*tasks)
 
 async def main():
-    pass 
+    sites = read_sites()
+    tasks = []
+    s1 = asyncio.Semaphore(5)
+    async with s1:
+        for site in sites:
+            tasks.append(asyncio.create_task(get_site_data(site)))
+        await asyncio.gather(*tasks) 
 
 if __name__ == "__main__":
-    a = load_grl_sites()
-    with open("temp/sites.csv","w") as f:
-        for site in a:
-            f.write(site+"\n")
+    # load_grl_sites()
+    # with open("temp/sites.csv","w") as f:
+        # for site in a:
+            # f.write(site+"\n")
     asyncio.run(main())
