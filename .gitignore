@@ -1,7 +1,8 @@
+.DS_Store
+
 # datas
 !/data/ztd/sites.csv
 data/*
-data
 radio/*
 radio
 
@@ -14,3 +15,7 @@ figs/*
 figs
 result_images/*
 result_images
+
+
+# models
+models/gpt

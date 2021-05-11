@@ -1,12 +1,18 @@
 import cdsapi
-import asyncio
+# import asyncio
+import multiprocessing
 import os
 from calendar import monthrange
+import requests
+response = requests.get(url='', verify=False)
 
-async def get_data_in(year, month, day):
+def get_data_in(year, month, day):
     if not os.path.exists(f"data/era5/{year}/"):
         os.makedirs(f"data/era5/{year}/")
-    c = cdsapi.Client()
+    # 判断是否已经下载过 文件已经存在且大于100M
+    if os.path.exists(f'data/era5/{year}/era5_{year}_{month}_{day}.nc') and os.path.getsize(f'data/era5/{year}/era5_{year}_{month}_{day}.nc')/float(1024*1024) > 100:
+        return
+    c = cdsapi.Client(quiet=True)
     c.retrieve(
         'reanalysis-era5-pressure-levels',
         {
@@ -50,27 +56,23 @@ async def get_data_in(year, month, day):
         },
         f'data/era5/{year}/era5_{year}_{month}_{day}.nc')
 
-async def get_year_month(year, month):
-    tasks = []
-    for day in range(1,monthrange(year,month)+1):
-        tasks.append(asyncio.create_task(get_data_in(year, month, day)))
-        break
-    await asyncio.gather(*tasks)
+def get_year_month(year, month):
+    for day in range(1,monthrange(year,month)[1]+1):
+        get_data_in(year, month, day)
 
-async def get_year(year):
-    tasks = []
+def get_year(year):
     for month in range(1,13):
-        tasks.append(asyncio.create_task(get_year_month(year, month)))
-        break
-    await asyncio.gather(*tasks)    
+        get_year_month(year, month)
 
-async def main():
-    tasks = []
-    for year in range(1979,2021):
-        tasks.append(asyncio.create_task(get_year(year)))
-        break
-    await asyncio.gather(*tasks)
+def main():
+    # s1 = asyncio.Semaphore(5)
+    # async with s1:
+    pool = multiprocessing.Pool(processes=6)
+    for year in range(2015,2020):
+        pool.apply_async(get_year, args = (year,))
+    pool.close()
+    pool.join()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
 
