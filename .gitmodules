@@ -1,0 +1,6 @@
+[submodule "models/models/GTrop"]
+	path = models/models/GTrop
+	url = git@github.com:Scallions/GTrop.git
+[submodule "models/GTrop"]
+	path = models/GTrop
+	url = git@github.com:Scallions/GTrop.git
