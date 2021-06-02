@@ -82,7 +82,7 @@ async def download_file(url, site, year, month, day):
     with open(file, "wb") as code:
         # 提取数据
         datas = extra_datas(rep.content)
-        code.write(datas)
+        code.write(datas.encode())
     print("end download ", url)
 
 def extra_datas(rep):
