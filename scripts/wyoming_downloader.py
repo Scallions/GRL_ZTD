@@ -1,6 +1,7 @@
 import asyncio
 import requests_async as requests
 import os
+import re
 
 """
 需要提取信息
@@ -44,12 +45,14 @@ def read_sites():
         for line in f.readlines():
             data = line.split()
             sites.append([data[0],data[-2], data[-1]])
-    return sites 
+    return sites
+
+
 
 async def download_file(url, site, year, month, day):
     print("start download ", url)
     path = f"./radio/wyoming/{site}/{year}"
-    file = f"./radio/wyoming/{site}/{year}/{month}-day.txt"
+    file = f"./radio/wyoming/{site}/{year}/{month}-{day}.txt"
     if not os.path.exists(path):
         os.makedirs(path)
     if os.path.exists(file):
@@ -77,11 +80,23 @@ async def download_file(url, site, year, month, day):
             await asyncio.sleep(1)
             continue
     with open(file, "wb") as code:
-        code.write(rep.content)
+        # 提取数据
+        datas = extra_datas(rep.content)
+        code.write(datas)
     print("end download ", url)
 
+def extra_datas(rep):
+    data_re = re.compile(r"<PRE>(.*?)</PRE>", re.DOTALL)
+    date_re = re.compile(r"Observation time: (\d+/\d+)")
+    res = data_re.findall(rep.decode())
+    datas = ""
+    for i in range(len(res)//2):
+        datas += date_re.findall(res[2*i+1])[0]
+        datas += res[2*i]
+    return datas
+
 async def get_data_in(site,year,month,day):
-    base_url = f'http://weather.uwyo.edu/cgi-bin/sounding?region=np&TYPE=TEXT%3ALIST&YEAR={year}&MONTH={month:02d}&FROM={day:02d}00&TO={day:02d}12&STNM={site}'
+    base_url = f'http://weather.uwyo.edu/cgi-bin/sounding?region=np&TYPE=TEXT%3ALIST&YEAR={year}&MONTH={month:02d}&FROM={day:02d}00&TO={day:02d}23&STNM={site}'
     await download_file(base_url, site, year, month, day)
 
 async def get_year_data(site, year):
@@ -99,7 +114,8 @@ async def get_site_data(site):
     tasks = []
     s1 = asyncio.Semaphore(5)
     async with s1:
-        for year in range(start,end+1):
+        # for year in range(start,end+1):
+        for year in range(2015, 2021):
             tasks.append(asyncio.create_task(get_year_data(site[0],year)))
         await asyncio.gather(*tasks)
 

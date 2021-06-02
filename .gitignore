@@ -4,18 +4,17 @@
 !/data/ztd/sites.csv
 data/*
 radio/*
-radio
+
 
 temp/*
 temp
 .vscode/*
+.idea
 
 # figures
 figs/*
-figs
 result_images/*
-result_images
 
 
 # models
-models/gpt
+models/gpt/*
