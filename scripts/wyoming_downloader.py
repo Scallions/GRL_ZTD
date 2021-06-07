@@ -55,10 +55,11 @@ async def download_file(url, site, year, month, day):
     file = f"./radio/wyoming/{site}/{year}/{month}-{day}.txt"
     if not os.path.exists(path):
         os.makedirs(path)
-    if os.path.exists(file):
+    if os.path.exists(file) and os.path.getsize(file) > 5000:
         print("end download file exist", url)
         return 
     i = 0
+    rep = None
     while True:
         i+=1
         if i > 10 :
@@ -72,17 +73,22 @@ async def download_file(url, site, year, month, day):
                 print("url not found ", url)
                 break 
             else:
-                await asyncio.sleep(1)
-            if i > 10 :
+                await asyncio.sleep(5)
+            if i > 20 :
                 print("url maybe not correct:",url)
                 break
         except:
-            await asyncio.sleep(1)
+            await asyncio.sleep(5)
             continue
+    if rep is None:
+        print("NO data", url)
+        return
     with open(file, "wb") as code:
         # 提取数据
         datas = extra_datas(rep.content)
         code.write(datas.encode())
+    if(os.path.getsize(file) < 1000):
+        os.remove(file)
     print("end download ", url)
 
 def extra_datas(rep):
@@ -102,7 +108,7 @@ async def get_data_in(site,year,month,day):
 async def get_year_data(site, year):
     for mon in range(1,13):
         tasks = []
-        s1 = asyncio.Semaphore(5)
+        s1 = asyncio.Semaphore(2)
         async with s1:
             for day in range(1,32):
                 tasks.append(asyncio.create_task(get_data_in(site,year, mon, day)))
@@ -112,7 +118,7 @@ async def get_site_data(site):
     start = int(site[-2])
     end = int(site[-1])
     tasks = []
-    s1 = asyncio.Semaphore(5)
+    s1 = asyncio.Semaphore(2)
     async with s1:
         # for year in range(start,end+1):
         for year in range(2015, 2021):
@@ -122,7 +128,7 @@ async def get_site_data(site):
 async def main():
     sites = read_sites()
     tasks = []
-    s1 = asyncio.Semaphore(5)
+    s1 = asyncio.Semaphore(2)
     async with s1:
         for site in sites:
             tasks.append(asyncio.create_task(get_site_data(site)))
