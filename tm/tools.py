@@ -1,6 +1,5 @@
-# some common codes
 import numpy as np
-import pandas as pd
+
 
 def read_sites():
     """read site meta data from csv file
@@ -14,6 +13,13 @@ def read_sites():
             data = line.split()
             sites.append(data)
     return sites
+
+def tm_files():
+    sites = read_sites()
+    for site in sites:
+        site_name = site[0]
+        fp = f"./radio/wyoming/{site_name}/tm.txt"
+        yield fp
 
 
 def remove_trend(mts):
