@@ -1,9 +1,11 @@
-.DS_Store
-
-
 # pytest
 **/.pytest_cache
 **/__pycache__
+# some system trash
+**/._.DS_Store
+**/.DS_Store
+# pytest
+**/.pytest_cache
 
 # datas
 !/data/ztd/sites.csv

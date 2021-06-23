@@ -81,7 +81,10 @@ async def download_file(url, site, year, month, day):
             await asyncio.sleep(5)
             continue
     if rep is None:
-        print("NO data", url)
+        print("Download error: ", url)
+        return
+    if '</PRE>' not in rep.content:
+        print('no content: ', url)
         return
     with open(file, "wb") as code:
         # 提取数据
@@ -121,7 +124,11 @@ async def get_site_data(site):
     s1 = asyncio.Semaphore(2)
     async with s1:
         # for year in range(start,end+1):
+<<<<<<< HEAD
+        for year in range(2015,2021):
+=======
         for year in range(2015, 2021):
+>>>>>>> b24556e4c98596f0a18568f1c8ec5eba4ab463e6
             tasks.append(asyncio.create_task(get_year_data(site[0],year)))
         await asyncio.gather(*tasks)
 
