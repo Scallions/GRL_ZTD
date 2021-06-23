@@ -1,3 +1,7 @@
+# some system trash
+**/._.DS_Store
+**/.DS_Store
+
 # datas
 !/data/ztd/sites.csv
 data/*

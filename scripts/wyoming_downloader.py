@@ -49,13 +49,14 @@ def read_sites():
 async def download_file(url, site, year, month, day):
     print("start download ", url)
     path = f"./radio/wyoming/{site}/{year}"
-    file = f"./radio/wyoming/{site}/{year}/{month}-day.txt"
+    file = f"./radio/wyoming/{site}/{year}/{month}-{day}.txt"
     if not os.path.exists(path):
         os.makedirs(path)
     if os.path.exists(file):
         print("end download file exist", url)
         return 
     i = 0
+    rep = None
     while True:
         i+=1
         if i > 10 :
@@ -76,6 +77,12 @@ async def download_file(url, site, year, month, day):
         except:
             await asyncio.sleep(1)
             continue
+    if rep is None:
+        print("Download error: ", url)
+        return
+    if '</PRE>' not in rep.content:
+        print('no content: ', url)
+        return
     with open(file, "wb") as code:
         code.write(rep.content)
     print("end download ", url)
@@ -99,7 +106,8 @@ async def get_site_data(site):
     tasks = []
     s1 = asyncio.Semaphore(5)
     async with s1:
-        for year in range(start,end+1):
+        # for year in range(start,end+1):
+        for year in range(2015,2021):
             tasks.append(asyncio.create_task(get_year_data(site[0],year)))
         await asyncio.gather(*tasks)
 
