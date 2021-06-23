@@ -1,20 +1,24 @@
 # some system trash
 **/._.DS_Store
 **/.DS_Store
+# pytest
+**/.pytest_cache
 
 # datas
 !/data/ztd/sites.csv
 data/*
-data
 radio/*
-radio
+
 
 temp/*
 temp
 .vscode/*
+.idea
 
 # figures
 figs/*
-figs
 result_images/*
-result_images
+
+
+# models
+models/gpt/*
